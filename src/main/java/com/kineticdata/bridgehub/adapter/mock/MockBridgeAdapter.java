@@ -9,6 +9,7 @@ import com.kineticdata.bridgehub.adapter.BridgeError;
 import com.kineticdata.bridgehub.adapter.BridgeUtils;
 
 import com.kineticdata.commons.v1.config.ConfigurablePropertyMap;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +30,20 @@ public class MockBridgeAdapter implements BridgeAdapter {
     
     /** Defines the logger */
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(MockBridgeAdapter.class);
+
+    /** Adapter version constant. */
+    public static String VERSION;
+    /** Load the properties version from the version.properties file. */
+    static {
+        try {
+            java.util.Properties properties = new java.util.Properties();
+            properties.load(MockBridgeAdapter.class.getResourceAsStream("/"+MockBridgeAdapter.class.getName()+".version"));
+            VERSION = properties.getProperty("version");
+        } catch (IOException e) {
+            logger.warn("Unable to load "+MockBridgeAdapter.class.getName()+" version properties.", e);
+            VERSION = "Unknown";
+        }
+    }
     
     /** Defines the collection of property names for the adapter. */
     public static class Properties {}
@@ -53,7 +68,7 @@ public class MockBridgeAdapter implements BridgeAdapter {
     
     @Override
     public String getVersion() {
-       return  "1.0.0";
+       return  VERSION;
     }
     
     @Override
@@ -78,11 +93,7 @@ public class MockBridgeAdapter implements BridgeAdapter {
     @Override
     public Count count(BridgeRequest request) throws BridgeError {
         request.setQuery(substituteQueryParameters(request));
-        // Log the access
-        logger.trace("Counting the records");
-        logger.trace("  Structure: " + request.getStructure());
-        logger.trace("  Query: " + request.getQuery());
-        
+
         // If the request is to simulate an error
         if (request.getParameter("error") != null) {
             throw new BridgeError(request.getParameter("error"));
@@ -103,12 +114,7 @@ public class MockBridgeAdapter implements BridgeAdapter {
     @Override
     public Record retrieve(BridgeRequest request) throws BridgeError {
         request.setQuery(substituteQueryParameters(request));
-        // Log the access
-        logger.trace("Retrieving a record");
-        logger.trace("  Structure: " + request.getStructure());
-        logger.trace("  Fields: " + request.getFieldString());
-        logger.trace("  Query: " + request.getQuery());
-        
+
         // If the request is to simulate an error
         if (request.getParameter("error") != null) {
             throw new BridgeError(request.getParameter("error"));
@@ -126,12 +132,7 @@ public class MockBridgeAdapter implements BridgeAdapter {
     @Override
     public RecordList search(BridgeRequest request) throws BridgeError {
         request.setQuery(substituteQueryParameters(request));
-        // Log the access
-        logger.trace("Searching the records");
-        logger.trace("  Structure: " + request.getStructure());
-        logger.trace("  Fields: " + request.getFieldString());
-        logger.trace("  Query: " + request.getQuery());
-        
+
         // If the request is to simulate an error
         if (request.getParameter("error") != null) {
             throw new BridgeError(request.getParameter("error"));
